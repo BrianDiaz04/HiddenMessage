@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cámara Roja</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: black;
+    }
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Filtro rojo */
+      filter: hue-rotate(0deg) saturate(200%) brightness(0.5) sepia(1);
+    }
+  </style>
+</head>
+<body>
+  <video id="cam" autoplay playsinline></video>
+
+  <script>
+    const video = document.getElementById('cam');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        console.error("No se pudo acceder a la cámara:", err);
+      });
+  </script>
+</body>
+</html>
