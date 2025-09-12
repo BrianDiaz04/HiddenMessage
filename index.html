@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Cámara Roja Intensa</title>
+  <title>Cámara Roja + ISO Bajo</title>
   <style>
     html, body {
       margin: 0;
@@ -20,16 +20,15 @@
       height: 100%;
       object-fit: cover;
     }
-    /* overlay rojo intenso */
     .red-overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(255, 0, 0, 1); /* rojo totalmente opaco */
+      background-color: rgba(255, 0, 0, 1); /* rojo intenso */
       pointer-events: none;
-      mix-blend-mode: color; /* asegura que solo afecte el color */
+      mix-blend-mode: color;
     }
   </style>
 </head>
@@ -39,13 +38,28 @@
 
   <script>
     const video = document.getElementById('cam');
+
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
       .then(stream => {
         video.srcObject = stream;
+
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        console.log("Capacidades de la cámara:", capabilities);
+
+        // Intentar ajustar ISO si es soportado
+        if (capabilities.iso) {
+          track.applyConstraints({
+            advanced: [{ iso: capabilities.iso.min }] // ISO mínimo
+          })
+          .then(() => console.log("ISO ajustado al mínimo"))
+          .catch(err => console.warn("No se pudo ajustar ISO:", err));
+        } else {
+          console.warn("ISO manual no soportado en esta cámara");
+        }
+
       })
-      .catch(err => {
-        console.error("No se pudo acceder a la cámara:", err);
-      });
+      .catch(err => console.error("No se pudo acceder a la cámara:", err));
   </script>
 </body>
 </html>
