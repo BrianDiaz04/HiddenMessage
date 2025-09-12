@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Cámara Roja</title>
+  <title>Cámara Roja Intensa</title>
   <style>
     html, body {
       margin: 0;
@@ -20,16 +20,16 @@
       height: 100%;
       object-fit: cover;
     }
-    /* overlay rojo */
+    /* overlay rojo intenso */
     .red-overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(255, 0, 0, 8); /* rojo semi-transparente */
-      pointer-events: none; /* permite que no interfiera con la cámara */
-      mix-blend-mode: color; /* mezcla para que afecte el color del video */
+      background-color: rgba(255, 0, 0, 1); /* rojo totalmente opaco */
+      pointer-events: none;
+      mix-blend-mode: color; /* asegura que solo afecte el color */
     }
   </style>
 </head>
