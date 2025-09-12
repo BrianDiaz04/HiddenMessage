@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Cámara Roja + ISO Bajo</title>
+  <title>Filtro Mensaje Oculto Rojo</title>
   <style>
     html, body {
       margin: 0;
@@ -12,7 +12,7 @@
       overflow: hidden;
       background: black;
     }
-    video {
+    video, canvas {
       position: absolute;
       top: 0;
       left: 0;
@@ -20,44 +20,58 @@
       height: 100%;
       object-fit: cover;
     }
-    .red-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255, 0, 0, 1); /* rojo intenso */
-      pointer-events: none;
-      mix-blend-mode: overlay;
-    }
   </style>
 </head>
 <body>
   <video id="cam" autoplay playsinline></video>
-  <div class="red-overlay"></div>
+  <canvas id="canvas"></canvas>
 
   <script>
     const video = document.getElementById('cam');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
       .then(stream => {
         video.srcObject = stream;
 
-        const track = stream.getVideoTracks()[0];
-        const capabilities = track.getCapabilities();
-        console.log("Capacidades de la cámara:", capabilities);
+        video.addEventListener('loadedmetadata', () => {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
 
-        // Intentar ajustar ISO si es soportado
-        if (capabilities.iso) {
-          track.applyConstraints({
-            advanced: [{ iso: capabilities.iso.min }] // ISO mínimo
-          })
-          .then(() => console.log("ISO ajustado al mínimo"))
-          .catch(err => console.warn("No se pudo ajustar ISO:", err));
-        } else {
-          console.warn("ISO manual no soportado en esta cámara");
-        }
+          function filterFrame() {
+            // Captura el frame del video
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = frame.data;
 
+            for (let i = 0; i < data.length; i += 4) {
+              let r = data[i];
+              let g = data[i + 1];
+              let b = data[i + 2];
+
+              // Convertimos a rojo intenso y eliminamos verde y azul
+              // Además se puede usar un "umbral" para mejorar contraste
+              if (r > g + 50 && r > b + 50) {
+                // Pixel rojo fuerte -> lo dejamos brillante
+                data[i] = 255;
+                data[i + 1] = 0;
+                data[i + 2] = 0;
+              } else {
+                // Todo lo demás -> oscuro
+                let gray = 0.2 * r + 0.2 * g + 0.2 * b;
+                data[i] = gray;
+                data[i + 1] = gray;
+                data[i + 2] = gray;
+              }
+            }
+
+            ctx.putImageData(frame, 0, 0);
+            requestAnimationFrame(filterFrame);
+          }
+
+          filterFrame();
+        });
       })
       .catch(err => console.error("No se pudo acceder a la cámara:", err));
   </script>
