@@ -2,30 +2,26 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Filtro Mensaje Oculto Rojo</title>
+  <title>Filtro Rojo Real</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
       overflow: hidden;
       background: black;
     }
-    video, canvas {
+    canvas {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       object-fit: cover;
     }
   </style>
 </head>
 <body>
-  <video id="cam" autoplay playsinline></video>
+  <video id="cam" autoplay playsinline style="display:none;"></video>
   <canvas id="canvas"></canvas>
-
+  
   <script>
     const video = document.getElementById('cam');
     const canvas = document.getElementById('canvas');
@@ -34,43 +30,31 @@
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
       .then(stream => {
         video.srcObject = stream;
-
-        video.addEventListener('loadedmetadata', () => {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-
-          function filterFrame() {
-            // Captura el frame del video
+        video.addEventListener('play', () => {
+          function draw() {
+            if (video.paused || video.ended) return;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            let data = frame.data;
-
+            
+            // Procesar píxeles
+            const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = frame.data;
             for (let i = 0; i < data.length; i += 4) {
-              let r = data[i];
-              let g = data[i + 1];
-              let b = data[i + 2];
-
-              // Convertimos a rojo intenso y eliminamos verde y azul
-              // Además se puede usar un "umbral" para mejorar contraste
-              if (r > g + 50 && r > b + 50) {
-                // Pixel rojo fuerte -> lo dejamos brillante
-                data[i] = 255;
-                data[i + 1] = 0;
-                data[i + 2] = 0;
-              } else {
-                // Todo lo demás -> oscuro
-                let gray = 0.2 * r + 0.2 * g + 0.2 * b;
-                data[i] = gray;
-                data[i + 1] = gray;
-                data[i + 2] = gray;
-              }
+              // data[i]   = R
+              // data[i+1] = G
+              // data[i+2] = B
+              // data[i+3] = Alpha
+              
+              // Dejar solo el rojo, anular verde/azul
+              data[i+1] = 0; // verde
+              data[i+2] = 0; // azul
             }
-
             ctx.putImageData(frame, 0, 0);
-            requestAnimationFrame(filterFrame);
+            
+            requestAnimationFrame(draw);
           }
-
-          filterFrame();
+          draw();
         });
       })
       .catch(err => console.error("No se pudo acceder a la cámara:", err));
