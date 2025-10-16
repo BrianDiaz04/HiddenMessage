@@ -1,0 +1,106 @@
+/* ====== RESET SIMPLE ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: 'Rubik', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.pantalla-inicial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ====== ESTILO GENERAL DE CADA PASO ====== */
+.paso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ====== CÍRCULO Y NÚMERO ====== */
+.numero {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* ====== TEXTOS ====== */
+.paso p {
+  font-size: 16px;
+  line-height: 1.4;
+  max-width: 280px;
+}
+
+/* ====== COLORES DIFERENTES POR PASO ====== */
+#paso1 {
+  color: #FF00FF;
+}
+
+#paso2 {
+  color: #FFF319;
+}
+
+#paso3 {
+  color: #fff;
+}
+#paso3 .resaltado {
+  color: #14FF14;
+}
+
+/* ====== BOTÓN ====== */
+.activar-filtro {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 248px;
+  height: 47px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 4px solid #0F0;
+  background: transparent;
+  color: #0F0;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  filter: blur(5.5px);
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 600px) {
+  .pantalla-inicial {
+    gap: 24px;
+  }
+  .paso p {
+    font-size: 15px;
+  }
+  .numero {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+}
