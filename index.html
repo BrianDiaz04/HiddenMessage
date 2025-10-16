@@ -1,22 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FiltroColor</title>
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      background: black;
-      font-family: sans-serif;
+    /* ==== RESET ==== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    canvas {
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: black;
+      font-family: 'Rubik', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ==== PANTALLA INICIAL ==== */
+    .pantalla-inicial {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 32px;
+      padding: 20px;
+      background-color: #000;
+      transition: opacity 1s ease;
+      z-index: 20;
+    }
+
+    .pantalla-inicial.oculta {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .paso {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .numero {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .paso p {
+      font-size: 16px;
+      line-height: 1.4;
+      max-width: 280px;
+    }
+
+    /* Colores por paso */
+    #paso1 { color: #FF00FF; }
+    #paso2 { color: #FFF319; }
+    #paso3 { color: #fff; }
+    #paso3 .resaltado { color: #14FF14; }
+
+    /* Botón */
+    .activar-filtro {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 248px;
+      height: 47px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 4px solid #0F0;
+      background: transparent;
+      color: #0F0;
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      filter: blur(5.5px);
+      cursor: pointer;
+    }
+
+    /* ==== CÁMARA ==== */
+    video, canvas {
       position: absolute;
       top: 0; left: 0;
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
     }
+
     #toggleBtn {
       position: absolute;
       bottom: 20px;
@@ -30,66 +114,101 @@
       border-radius: 12px;
       cursor: pointer;
       z-index: 10;
+      display: none;
     }
+
     #toggleBtn:active {
       background: rgba(255,255,255,0.2);
+    }
+
+    @media (max-width: 600px) {
+      .numero { width: 42px; height: 42px; font-size: 18px; }
+      .pantalla-inicial { gap: 24px; }
+      .paso p { font-size: 15px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- ===== PANTALLA DE INTRO ===== -->
+  <main class="pantalla-inicial" id="pantallaIntro">
+    <section class="paso" id="paso1">
+      <div class="numero">1</div>
+      <p><span class="resaltado">Apuntá</span> tu cámara al póster frente a vos.</p>
+    </section>
+
+    <section class="paso" id="paso2">
+      <div class="numero">2</div>
+      <p><span class="resaltado">Observá</span> cómo el color revela lo que estaba oculto.</p>
+    </section>
+
+    <section class="paso" id="paso3">
+      <div class="numero">3</div>
+      <p>Dejá que la luz y tu mirada descubran <span class="resaltado">secretos</span> de umbrales.</p>
+    </section>
+
+    <button class="activar-filtro" id="activarFiltro">Activar filtro</button>
+  </main>
+
+  <!-- ===== CÁMARA ===== -->
   <video id="cam" autoplay playsinline style="display:none;"></video>
   <canvas id="canvas"></canvas>
-  <button id="toggleBtn">Filtro: Rojo</button>
-  
+  <button id="toggleBtn">Filtro: Verde</button>
+
   <script>
+    const pantallaIntro = document.getElementById('pantallaIntro');
+    const activarBtn = document.getElementById('activarFiltro');
     const video = document.getElementById('cam');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const btn = document.getElementById('toggleBtn');
+    const toggleBtn = document.getElementById('toggleBtn');
 
-    let filtros = ["rojo", "azul", "verde"];
-    let indexFiltro = 0; // empieza en rojo
+    let filtros = ["verde", "azul"];
+    let indexFiltro = 0; 
     let currentFilter = filtros[indexFiltro];
 
-    btn.addEventListener("click", () => {
+    toggleBtn.addEventListener("click", () => {
       indexFiltro = (indexFiltro + 1) % filtros.length;
       currentFilter = filtros[indexFiltro];
-      btn.textContent = "Filtro: " + currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1);
+      toggleBtn.textContent = "Filtro: " + currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1);
     });
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-      .then(stream => {
-        video.srcObject = stream;
-        video.addEventListener('play', () => {
-          function draw() {
-            if (video.paused || video.ended) return;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Procesar píxeles
-            const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = frame.data;
-            for (let i = 0; i < data.length; i += 4) {
-              if (currentFilter === "rojo") {
-                data[i+1] = 0; // G -> 0
-                data[i+2] = 0; // B -> 0
-              } else if (currentFilter === "azul") {
-                data[i]   = 0; // R -> 0
-                data[i+1] = 0; // G -> 0
-              } else if (currentFilter === "verde") {
-                data[i]   = 0; // R -> 0
-                data[i+2] = 0; // B -> 0
+    activarBtn.addEventListener("click", () => {
+      pantallaIntro.classList.add("oculta");
+      toggleBtn.style.display = "block";
+      iniciarCamara();
+    });
+
+    function iniciarCamara() {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(stream => {
+          video.srcObject = stream;
+          video.addEventListener('play', () => {
+            function draw() {
+              if (video.paused || video.ended) return;
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const data = frame.data;
+              for (let i = 0; i < data.length; i += 4) {
+                if (currentFilter === "azul") {
+                  data[i] = 0;
+                  data[i+1] = 0;
+                } else if (currentFilter === "verde") {
+                  data[i] = 0;
+                  data[i+2] = 0;
+                }
               }
+              ctx.putImageData(frame, 0, 0);
+              requestAnimationFrame(draw);
             }
-            ctx.putImageData(frame, 0, 0);
-            
-            requestAnimationFrame(draw);
-          }
-          draw();
-        });
-      })
-      .catch(err => console.error("No se pudo acceder a la cámara:", err));
+            draw();
+          });
+        })
+        .catch(err => console.error("No se pudo acceder a la cámara:", err));
+    }
   </script>
 </body>
 </html>
