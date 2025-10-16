@@ -16,9 +16,20 @@
       width: 100%;
       height: 100%;
       background: #050014;
-      font-family: 'Rubik', sans-serif;
-      overflow: hidden;
       color: white;
+      overflow: hidden;
+    }
+
+    /* ==== FUENTE LOCAL ==== */
+    @font-face {
+      font-family: "RubikBold";
+      src: url("./font/rubik-bold.ttf") format("truetype");
+      font-weight: bold;
+      font-style: normal;
+    }
+
+    body {
+      font-family: "RubikBold", sans-serif;
     }
 
     /* ==== PANTALLA INICIAL ==== */
@@ -35,19 +46,19 @@
       background-color: #050014;
       transition: opacity 1s ease, z-index 1s ease;
       z-index: 20;
-      animation: aparecerDesdeFondo 1.4s ease forwards;
+      animation: aparecerSuave 1.2s ease forwards;
     }
 
-    /* 🎞️ Nueva animación más profunda */
-    @keyframes aparecerDesdeFondo {
+    /* 🎞️ Animación más natural, sin escalonamiento */
+    @keyframes aparecerSuave {
       0% {
         opacity: 0;
-        transform: scale(0.9) translateY(40px);
-        filter: blur(8px);
+        transform: translateY(30px) scale(1.02);
+        filter: blur(6px);
       }
       100% {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: translateY(0) scale(1);
         filter: blur(0);
       }
     }
@@ -64,12 +75,7 @@
       flex-direction: column;
       align-items: center;
       gap: 12px;
-      animation: aparecerDesdeFondo 1.2s ease forwards;
     }
-
-    .paso:nth-child(1) { animation-delay: 0.2s; }
-    .paso:nth-child(2) { animation-delay: 0.4s; }
-    .paso:nth-child(3) { animation-delay: 0.6s; }
 
     .numero {
       width: 48px;
@@ -102,6 +108,7 @@
 
     /* ==== BOTÓN ACTIVAR ==== */
     .activar-filtro {
+      font-family: sans-serif; /* 👈 no usa Rubik */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -120,8 +127,7 @@
       text-shadow: 0 0 8px #0F0, 0 0 16px #0F0;
       box-shadow: 0 0 8px #0F0, 0 0 16px #0F0 inset;
       transition: transform 0.2s, box-shadow 0.3s ease;
-      animation: aparecerDesdeFondo 1.4s ease forwards;
-      animation-delay: 0.8s;
+      animation: aparecerSuave 1.2s ease forwards;
     }
 
     .activar-filtro:hover {
@@ -144,6 +150,7 @@
 
     /* ==== BOTÓN TOGGLE RESPONSIVE ==== */
     #toggleBtn {
+      font-family: sans-serif; /* 👈 no usa Rubik */
       position: absolute;
       bottom: 5vh;
       left: 50%;
@@ -154,7 +161,7 @@
       width: 60vw;             /* 🔧 ocupa el 60% del ancho */
       max-width: 280px;        /* límite en pantallas grandes */
       padding: 3vh 0;          /* proporcional al alto */
-      font-size: clamp(14px, 4vw, 18px); /* 🔧 tamaño adaptable */
+      font-size: clamp(14px, 4vw, 18px);
       border-radius: 3vh;
       cursor: pointer;
       z-index: 10;
